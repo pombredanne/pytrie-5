@@ -13,7 +13,7 @@ class TrieNode:
 
 class Trie:
 	def __init__(self):		
-		self.node = TrieNode("root", 0)
+		self.node = TrieNode("", 0)
 		
 	def add(self, value):
 		self.node.size+=1
@@ -67,8 +67,6 @@ class Trie:
 		if not node.children:
 			return	
 
-
-
 	# -----------  DFS print of Trie --------------
 	def printDFSTrie(self, root):
 		self.printDFSNode(root.node)
@@ -81,46 +79,51 @@ class Trie:
 			self.printDFSNode(x)
 		if not node.children:
 			return
+	
+	# ------------ DFS print to file ---------------
+	def printDFSTraverseToFile(self, root):
+		target = open('dfs-traverse-info.trie','w+')
+		self.DFSTraverse(root.node, target, '')
+		target.close()
 
-def getWords():
-	con = sqlite3.connect("Dehkhoda.db")
-	cursor = con.execute("SELECT name from dehkhoda")
-	words = []
-	for row in cursor:
-		words.append(row[0])
-	con.close()
-	return words
+
+	def DFSTraverse(self, node, fileName, fileVal):
+		fileVal += node.value
+		word = 'value: '+fileVal+'*, prob:'+str(node.prob)
+		fileName.write(word.encode('utf-8'))
+		fileName.write('\n')
+		for child in node.children:
+			self.DFSTraverse(child, fileName, fileVal)
+		if not node.children:
+			return		
+
+class Dehkhoda:
+	def __init__(self):
+		self.words = []
+	
+	def getWords(self):
+		con = sqlite3.connect("Dehkhoda.db")
+		cursor = con.execute("SELECT name from dehkhoda")
+		for row in cursor:
+			self.words.append(row[0])
+		con.close()
+
+
 
 
 start = timeit.default_timer()
 myTrie = Trie()
 
-words = getWords()
-
-'''
-a = words[2345]
-print words[2345]
-print list(words[2345])
-
-myTrie.add(words[2000])
+db = Dehkhoda()
+db.getWords()
 
 
-
-
-myTrie.add("ali")
-myTrie.add("a")
-myTrie.add("alam")
-myTrie.add("bui")
-myTrie.add("bli")
-myTrie.add("blue")
-'''
-
-for x in xrange(0,len(words)):
-	myTrie.add(words[x])
-
+for x in xrange(0,len(db.words)):
+	myTrie.add(db.words[x])
 
 myTrie.nodesProbability(myTrie)
 #myTrie.printDFSTrie(myTrie)
+myTrie.printDFSTraverseToFile(myTrie)
 
 stop = timeit.default_timer()
 
