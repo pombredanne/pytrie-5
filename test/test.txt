@@ -1,0 +1,1 @@
+calculate max level, find a word, average level, words average length, max probable word* in a favor level of Trie
